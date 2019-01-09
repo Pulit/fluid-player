@@ -1,0 +1,23 @@
+{
+  "name": "fluid-player",
+  "version": "2.4.4",
+  "description": "[![Latest version](https://img.shields.io/badge/Latest%20Version-2.4.4-blue.svg)](https://github.com/fluid-player/fluid-player/releases/latest)",
+  "main": "fluidplayer.js",
+  "scripts": {
+    "minify": "concurrently \"uglifyjs fluidplayer.js --compress --mangle -o fluidplayer.min.js\" \"cleancss --inline 'local,remote,!fonts.googleapis.com' -o fluidplayer.min.css fluidplayer.css\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "PulitInc-GitHub:Pulit/fluid-player.git"
+  },
+  "author": "Pulit Inc.",
+  "license": "MIT",
+  "private": true,
+  "devDependencies": {
+    "clean-css": "^4.2.1",
+    "clean-css-cli": "^4.2.1",
+    "concurrently": "^4.1.0",
+    "uglify-js": "^3.4.9"
+  }
+}
