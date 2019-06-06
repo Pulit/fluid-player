@@ -245,28 +245,23 @@ var fluidPlayerCreator = function () {
                 if ((idx = ua.indexOf("OPR/")) != -1) {
                     result.browserName = "Opera";
                     result.fullVersion = ua.substring(idx + 4);
-                }
-                else if ((idx = ua.indexOf("Opera")) != -1) {
+                } else if ((idx = ua.indexOf("Opera")) != -1) {
                     result.browserName = "Opera";
                     result.fullVersion = ua.substring(idx + 6);
                     if ((idx = ua.indexOf("Version")) != -1)
                         result.fullVersion = ua.substring(idx + 8);
-                }
-                else if ((idx = ua.indexOf("MSIE")) != -1) {
+                } else if ((idx = ua.indexOf("MSIE")) != -1) {
                     result.browserName = "Microsoft Internet Explorer";
                     result.fullVersion = ua.substring(idx + 5);
-                }
-                else if ((idx = ua.indexOf("Chrome")) != -1) {
+                } else if ((idx = ua.indexOf("Chrome")) != -1) {
                     result.browserName = "Google Chrome";
                     result.fullVersion = ua.substring(idx + 7);
-                }
-                else if ((idx = ua.indexOf("Safari")) != -1) {
+                } else if ((idx = ua.indexOf("Safari")) != -1) {
                     result.browserName = "Safari";
                     result.fullVersion = ua.substring(idx + 7);
                     if ((idx = ua.indexOf("Version")) != -1)
                         result.fullVersion = ua.substring(idx + 8);
-                }
-                else if ((idx = ua.indexOf("Firefox")) != -1) {
+                } else if ((idx = ua.indexOf("Firefox")) != -1) {
                     result.browserName = "Mozilla Firefox";
                     result.fullVersion = ua.substring(idx + 8);
                 }
@@ -614,7 +609,7 @@ var fluidPlayerCreator = function () {
                 return;
             }
 
-            if (typeof(code) !== 'undefined') {
+            if (typeof (code) !== 'undefined') {
                 code = parseInt(code);
             } else {
                 //Set a default code (900 Unidentified error)
@@ -629,7 +624,7 @@ var fluidPlayerCreator = function () {
 
 
         announceLocalError: function (code, msg) {
-            if (typeof(code) !== 'undefined') {
+            if (typeof (code) !== 'undefined') {
                 code = parseInt(code);
             } else {
                 //Set a default code (900 Unidentified error)
@@ -3643,7 +3638,7 @@ var fluidPlayerCreator = function () {
             var videoPlayerTag = this;
             var player = fluidPlayerClass.getInstanceById(videoPlayerTag.id);
 
-            if(player !== null) {
+            if (player !== null) {
                 if (
                     (videoPlayerTag.networkState === videoPlayerTag.NETWORK_NO_SOURCE) &&
                     player.isCurrentlyPlayingAd
@@ -4317,9 +4312,9 @@ var fluidPlayerCreator = function () {
                 switch (this.displayOptions.layoutControls.theatreSettings.horizontalAlign) {
                     case 'center':
                         // We must calculate the margin differently based on whether they passed % or px
-                        if (typeof(workingWidth) == 'string' && workingWidth.substr(workingWidth.length - 1) == "%") {
+                        if (typeof (workingWidth) == 'string' && workingWidth.substr(workingWidth.length - 1) == "%") {
                             defaultHorizontalMargin = ((100 - parseInt(workingWidth.substring(0, workingWidth.length - 1))) / 2) + "%"; // A margin of half the remaining space
-                        } else if (typeof(workingWidth) == 'string' && workingWidth.substr(workingWidth.length - 2) == "px") {
+                        } else if (typeof (workingWidth) == 'string' && workingWidth.substr(workingWidth.length - 2) == "px") {
                             defaultHorizontalMargin = (((screen.width - parseInt(workingWidth.substring(0, workingWidth.length - 2))) / screen.width) * 100 / 2) + "%"; // Half the (Remaining width / fullwidth)
                         } else {
                             console.log('[FP_ERROR] Theatre width specified invalid.');
@@ -4449,17 +4444,17 @@ var fluidPlayerCreator = function () {
         },
 
         setPersistentSettings: function () {
-            if (typeof(Storage) !== "undefined" && typeof(localStorage) !== "undefined") {
+            if (typeof (Storage) !== "undefined" && typeof (localStorage) !== "undefined") {
                 this.fluidStorage = localStorage;
 
-                if (typeof(this.fluidStorage.fluidVolume) !== "undefined" && this.displayOptions.layoutControls.persistentSettings.volume) {
+                if (typeof (this.fluidStorage.fluidVolume) !== "undefined" && this.displayOptions.layoutControls.persistentSettings.volume) {
                     this.setVolume(this.fluidStorage.fluidVolume);
-                    if (typeof(this.fluidStorage.fluidMute) !== "undefined" && this.fluidStorage.fluidMute == "true") {
+                    if (typeof (this.fluidStorage.fluidMute) !== "undefined" && this.fluidStorage.fluidMute == "true") {
                         this.muteToggle(this.videoPlayerId);
                     }
                 }
 
-                if (typeof(this.fluidStorage.fluidQuality) !== "undefined" && this.displayOptions.layoutControls.persistentSettings.quality) {
+                if (typeof (this.fluidStorage.fluidQuality) !== "undefined" && this.displayOptions.layoutControls.persistentSettings.quality) {
                     var sourceOption = document.getElementById('source_' + this.videoPlayerId + '_' + this.fluidStorage.fluidQuality);
                     var sourceChangeButton = document.getElementById(this.videoPlayerId + '_fluid_control_video_source');
                     if (sourceOption) {
@@ -4468,11 +4463,11 @@ var fluidPlayerCreator = function () {
                     }
                 }
 
-                if (typeof(this.fluidStorage.fluidSpeed) !== "undefined" && this.displayOptions.layoutControls.persistentSettings.speed) {
+                if (typeof (this.fluidStorage.fluidSpeed) !== "undefined" && this.displayOptions.layoutControls.persistentSettings.speed) {
                     this.setPlaybackSpeed(this.fluidStorage.fluidSpeed);
                 }
 
-                if (typeof(this.fluidStorage.fluidTheatre) !== "undefined" && this.fluidStorage.fluidTheatre == "true" && this.displayOptions.layoutControls.persistentSettings.theatre) {
+                if (typeof (this.fluidStorage.fluidTheatre) !== "undefined" && this.fluidStorage.fluidTheatre == "true" && this.displayOptions.layoutControls.persistentSettings.theatre) {
                     this.theatreToggle();
                 }
             }
@@ -4949,6 +4944,16 @@ var fluidPlayerCreator = function () {
                 clearInterval(this.nonLinearTracking);
                 this.nonLinearTracking = undefined;
             }
+
+            this.removeClickthrough();
+            this.removeSkipButton();
+            this.removeAdCountdown();
+            this.removeAdPlayingText();
+            this.removeCTAButton();
+        },
+
+        destroy: function () {
+            this.clear();
             this.destroyed = true;
             fluidPlayerClass = fluidPlayerCreator();
         },
