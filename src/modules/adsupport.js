@@ -379,6 +379,15 @@ export default function (playerInstance, options) {
                 }
                 break;
 
+            case 'pause':
+            case 'resume':
+            case 'mute':
+            case 'unmute':
+                if (playerInstance.vastOptions.tracking[eventType] !== null) {
+                    trackingUris = playerInstance.vastOptions.tracking[eventType];
+                }
+                break;
+
             case 'progress':
                 playerInstance.vastOptions.tracking['progress'][eventSubType].elements.forEach(function (currentValue, index) {
                     if (

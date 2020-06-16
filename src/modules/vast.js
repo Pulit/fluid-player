@@ -233,6 +233,10 @@ export default function (playerInstance, options) {
                 case 'complete':
                 case 'creativeView':
                 case 'skip':
+                case 'pause':
+                case 'resume':
+                case 'mute':
+                case 'unmute':
                     if (typeof tmpOptions.tracking[eventType] === 'undefined') {
                         tmpOptions.tracking[eventType] = [];
                     }

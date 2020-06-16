@@ -473,7 +473,7 @@ const fluidPlayerClass = function () {
     };
 
     self.toggleLoader = (showLoader) => {
-        if(self.destroyed) {
+        if (self.destroyed) {
             return
         }
 
@@ -761,8 +761,20 @@ const fluidPlayerClass = function () {
 
         const initialPlay = document.getElementById(self.videoPlayerId + '_fluid_initial_play');
         if (initialPlay) {
-            document.getElementById(self.videoPlayerId + '_fluid_initial_play').style.display = "none";
+            const playButton = document.getElementById(self.videoPlayerId + '_fluid_initial_play');
+            const orgStyle = playButton.style.display;
+            playButton.style.display = "none";
             document.getElementById(self.videoPlayerId + '_fluid_initial_play_button').style.opacity = "1";
+            if (orgStyle === 'block' && playButton.dataset.paused === "1") {
+                if (self.trackSingleEvent) {
+                    self.trackSingleEvent('resume');
+                }
+            } else if (orgStyle === 'none' && self.domRef.player.paused) {
+                if (self.trackSingleEvent) {
+                    playButton.dataset.paused = "1";
+                    self.trackSingleEvent('pause');
+                }
+            }
         }
 
         if (!self.domRef.player.paused) {
@@ -1801,7 +1813,7 @@ const fluidPlayerClass = function () {
      * @returns Boolean
      */
     self.checkIfVolumebarIsRendered = () => {
-        if(self.destroyed) {
+        if (self.destroyed) {
             return false
         }
         const volumeposTag = document.getElementById(self.videoPlayerId + '_fluid_control_volume_currentpos');
@@ -2716,6 +2728,10 @@ const fluidPlayerClass = function () {
 
         self.latestVolume = latestVolume;
         self.fluidStorage.fluidVolume = latestVolume;
+
+        if (self.trackSingleEvent) {
+            self.trackSingleEvent(passedVolume === 0 ? 'mute' : 'unmute')
+        }
     };
 
     self.isCurrentlyPlayingVideo = (instance) => {
