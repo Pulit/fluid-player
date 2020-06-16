@@ -231,6 +231,8 @@ export default function (playerInstance, options) {
                 case 'midpoint':
                 case 'thirdQuartile':
                 case 'complete':
+                case 'creativeView':
+                case 'skip':
                     if (typeof tmpOptions.tracking[eventType] === 'undefined') {
                         tmpOptions.tracking[eventType] = [];
                     }

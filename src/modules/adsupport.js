@@ -179,6 +179,9 @@ export default function (playerInstance, options) {
 
                 playerInstance.domRef.player.addEventListener('loadedmetadata', playerInstance.switchPlayerToVastMode);
 
+                //Announce the creativeView
+                playerInstance.trackSingleEvent('creativeView');
+
                 playerInstance.domRef.player.src = selectedMediaFile.src;
                 playerInstance.isCurrentlyPlayingAd = true;
 
@@ -365,6 +368,8 @@ export default function (playerInstance, options) {
             case 'midpoint':
             case 'thirdQuartile':
             case 'complete':
+            case 'creativeView':
+            case 'skip':
                 if (playerInstance.vastOptions.stopTracking[eventType] === false) {
                     if (playerInstance.vastOptions.tracking[eventType] !== null) {
                         trackingUris = playerInstance.vastOptions.tracking[eventType];
@@ -1435,6 +1440,8 @@ export default function (playerInstance, options) {
         playerInstance.removeSkipButton();
         playerInstance.removeAdPlayingText();
         playerInstance.removeCTAButton();
+
+        playerInstance.trackSingleEvent('skip');
 
         if (playerInstance.vastOptions.vpaid) {
             // skip the linear vpaid ad
