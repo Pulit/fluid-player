@@ -149,6 +149,7 @@ const fluidPlayerClass = function () {
         self.fluidPseudoPause = false;
         self.mobileInfo = self.getMobileOs();
         self.events = {};
+        self.destroyed = false;
 
         //Default options
         self.displayOptions = {
@@ -471,6 +472,10 @@ const fluidPlayerClass = function () {
     };
 
     self.toggleLoader = (showLoader) => {
+        if(self.destroyed) {
+            return
+        }
+
         self.isLoading = !!showLoader;
 
         const loaderDiv = document.getElementById('vast_video_loading_' + self.videoPlayerId);
@@ -1755,6 +1760,9 @@ const fluidPlayerClass = function () {
         let remainingAttemptsToInitiateVolumeBar = 100;
 
         const initiateVolumebar = function () {
+            if (self.destroyed) {
+                clearInterval(initiateVolumebarTimerId);
+            }
             if (!remainingAttemptsToInitiateVolumeBar) {
                 clearInterval(initiateVolumebarTimerId);
             } else if (self.checkIfVolumebarIsRendered()) {
@@ -1796,6 +1804,9 @@ const fluidPlayerClass = function () {
      * @returns Boolean
      */
     self.checkIfVolumebarIsRendered = () => {
+        if(self.destroyed) {
+            return false
+        }
         const volumeposTag = document.getElementById(self.videoPlayerId + '_fluid_control_volume_currentpos');
         const volumebarTotalWidth = document.getElementById(self.videoPlayerId + '_fluid_control_volume').clientWidth;
         const volumeposTagWidth = volumeposTag.clientWidth;
@@ -2869,22 +2880,27 @@ const fluidPlayerClass = function () {
     };
 
     self.destroy = () => {
+        self.destroyed = true
+
         const numDestructors = self.destructors.length;
 
-        if (0 === numDestructors) {
-            return;
+        if (0 < numDestructors) {
+            for (let i = 0; i < numDestructors; ++i) {
+                self.destructors[i].bind(this)();
+            }
         }
 
-        for (let i = 0; i < numDestructors; ++i) {
-            self.destructors[i].bind(this)();
-        }
-
+        const video = self.domRef.player
         const container = document.getElementById('fluid_video_wrapper_' + self.videoPlayerId);
 
         if (!container) {
             console.warn('Unable to remove wrapper element for Fluid Player instance - element not found ' + self.videoPlayerId);
             return;
         }
+
+        container.removeChild(video)
+        container.parentNode.appendChild(video)
+        video.removeAttribute('src')
 
         if ('function' === typeof container.remove) {
             container.remove();
