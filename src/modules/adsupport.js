@@ -86,8 +86,11 @@ export default function (playerInstance, options) {
                         playerInstance.addClickthroughLayer(playerInstance.videoPlayerId);
                     }
 
-                    playerInstance.addCTAButton(playerInstance.adList[adListId].landingPage);
-
+                    if (!playerInstance.adList[adListId].landingPage) {
+                        playerInstance.addCTAButton(playerInstance.adPool[adListId].clickthroughUrl);
+                    } else {
+                        playerInstance.addCTAButton(playerInstance.adList[adListId].landingPage);
+                    }
                 }
 
                 if (playerInstance.vastOptions.skipoffset !== false) {
@@ -125,7 +128,7 @@ export default function (playerInstance, options) {
                 playerInstance.domRef.player.removeEventListener('loadedmetadata', playerInstance.switchPlayerToVastMode);
 
                 // if in vr mode then do not show
-                if (!playerInstance.vrMode) {
+                if (playerInstance.vrMode) {
                     const adCountDownTimerText = document.getElementById('ad_countdown' + playerInstance.videoPlayerId);
                     const ctaButton = document.getElementById(playerInstance.videoPlayerId + '_fluid_cta');
                     const addAdPlayingTextOverlay = document.getElementById(playerInstance.videoPlayerId + '_fluid_ad_playing');
@@ -1370,8 +1373,12 @@ export default function (playerInstance, options) {
                 playerInstance.domRef.player.pause();
             }
 
-            const win = window.open(playerInstance.vastOptions.clickthroughUrl, '_blank');
-            win.focus();
+            const event = document.createEvent('CustomEvent');
+            event.initEvent('clickthroughUrl', false, true);
+            event.url = playerInstance.vastOptions.clickthroughUrl
+            playerInstance.domRef.player.dispatchEvent(event)
+            // const win = window.open(playerInstance.vastOptions.clickthroughUrl, '_blank');
+            // win.focus();
             return true;
         }, false);
 
