@@ -149,6 +149,7 @@ const fluidPlayerClass = function () {
         self.fluidPseudoPause = false;
         self.mobileInfo = self.getMobileOs();
         self.events = {};
+        self.eventListeners = {};
         self.destroyed = false;
 
         //Default options
@@ -284,14 +285,14 @@ const fluidPlayerClass = function () {
 
         self.domRef.wrapper = self.setupPlayerWrapper();
 
-        playerNode.addEventListener('webkitfullscreenchange', self.recalculateAdDimensions);
-        playerNode.addEventListener('fullscreenchange', self.recalculateAdDimensions);
-        playerNode.addEventListener('waiting', self.onRecentWaiting);
-        playerNode.addEventListener('pause', self.onFluidPlayerPause);
-        playerNode.addEventListener('loadedmetadata', self.mainVideoReady);
-        playerNode.addEventListener('error', self.onErrorDetection);
-        playerNode.addEventListener('ended', self.onMainVideoEnded);
-        playerNode.addEventListener('durationchange', () => {
+        self.addEventListener(playerNode, 'webkitfullscreenchange', self.recalculateAdDimensions);
+        self.addEventListener(playerNode, 'fullscreenchange', self.recalculateAdDimensions);
+        self.addEventListener(playerNode, 'waiting', self.onRecentWaiting);
+        self.addEventListener(playerNode, 'pause', self.onFluidPlayerPause);
+        self.addEventListener(playerNode, 'loadedmetadata', self.mainVideoReady);
+        self.addEventListener(playerNode, 'error', self.onErrorDetection);
+        self.addEventListener(playerNode, 'ended', self.onMainVideoEnded);
+        self.addEventListener(playerNode, 'durationchange', () => {
             self.currentVideoDuration = self.getCurrentVideoDuration();
         });
 
@@ -1455,17 +1456,17 @@ const fluidPlayerClass = function () {
     };
 
     self.initialPlay = () => {
-        self.domRef.player.addEventListener('playing', () => {
+        self.addEventListener(self.domRef.player, 'playing', () => {
             self.toggleLoader(false);
         });
 
-        self.domRef.player.addEventListener('timeupdate', () => {
+        self.addEventListener(self.domRef.player, 'timeupdate', () => {
             // some places we are manually displaying toggleLoader
             // user experience toggleLoader being displayed even when content is playing in background
             self.toggleLoader(false);
         });
 
-        self.domRef.player.addEventListener('waiting', () => {
+        self.addEventListener(self.domRef.player, 'waiting', () => {
             self.toggleLoader(true);
         });
 
@@ -1482,7 +1483,7 @@ const fluidPlayerClass = function () {
 
         if (!self.firstPlayLaunched) {
             self.playPauseToggle();
-            self.domRef.player.removeEventListener('play', self.initialPlay);
+            self.removeEventListener(self.domRef.player, 'play', self.initialPlay);
         }
     };
 
@@ -1565,7 +1566,7 @@ const fluidPlayerClass = function () {
             if (self.mainVideoDuration > 0) {
                 prepareVastAdsThatKnowDuration();
             } else {
-                self.domRef.player.addEventListener('mainVideoDurationSet', prepareVastAdsThatKnowDuration);
+                self.addEventListener(self.domRef.player, 'mainVideoDurationSet', prepareVastAdsThatKnowDuration);
             }
         }
 
@@ -1586,23 +1587,23 @@ const fluidPlayerClass = function () {
         //Set the Play/Pause behaviour
         self.trackEvent(self.domRef.player.parentNode, 'click', '.fluid_control_playpause', () => {
             if (!self.firstPlayLaunched) {
-                self.domRef.player.removeEventListener('play', self.initialPlay);
+                self.removeEventListener(self.domRef.player, 'play', self.initialPlay);
             }
 
             self.playPauseToggle();
         }, false);
 
-        self.domRef.player.addEventListener('play', () => {
+        self.addEventListener(self.domRef.player, 'play', () => {
             self.controlPlayPauseToggle();
             self.contolVolumebarUpdate();
         }, false);
 
-        self.domRef.player.addEventListener('fluidplayerpause', () => {
+        self.addEventListener(self.domRef.player, 'fluidplayerpause', () => {
             self.controlPlayPauseToggle();
         }, false);
 
         //Set the progressbar
-        self.domRef.player.addEventListener('timeupdate', () => {
+        self.addEventListener(self.domRef.player, 'timeupdate', () => {
             self.contolProgressbarUpdate();
             self.controlDurationUpdate();
         });
@@ -1627,7 +1628,7 @@ const fluidPlayerClass = function () {
         document.getElementById(self.videoPlayerId + '_fluid_control_volume_container')
             .addEventListener(eventOn, event => self.onVolumeBarMouseDown(), false);
 
-        self.domRef.player.addEventListener('volumechange', () => self.contolVolumebarUpdate());
+        self.addEventListener(self.domRef.player, 'volumechange', () => self.contolVolumebarUpdate());
 
         self.trackEvent(self.domRef.player.parentNode, 'click', '.fluid_control_mute', () => self.muteToggle());
 
@@ -1644,7 +1645,7 @@ const fluidPlayerClass = function () {
             document.getElementById(self.videoPlayerId + '_fluid_control_theatre').style.display = 'none';
         }
 
-        self.domRef.player.addEventListener('ratechange', () => {
+        self.addEventListener(self.domRef.player, 'ratechange', () => {
             if (self.isCurrentlyPlayingAd) {
                 self.playbackRate = 1;
             }
@@ -1784,7 +1785,7 @@ const fluidPlayerClass = function () {
         let initiateVolumebarTimerId = setInterval(initiateVolumebar, 100);
 
         if (self.displayOptions.layoutControls.doubleclickFullscreen) {
-            self.domRef.player.addEventListener('dblclick', self.fullscreenToggle);
+            self.addEventListener(self.domRef.player, 'dblclick', self.fullscreenToggle);
         }
 
         self.initHtmlOnPauseBlock();
@@ -1826,9 +1827,9 @@ const fluidPlayerClass = function () {
     self.setLayout = () => {
         //All other browsers
         const listenTo = (self.isTouchDevice()) ? 'touchend' : 'click';
-        self.domRef.player.addEventListener(listenTo, () => self.playPauseToggle(), false);
+        self.addEventListener(self.domRef.player, listenTo, () => self.playPauseToggle(), false);
         //Mobile Safari - because it does not emit a click event on initial click of the video
-        self.domRef.player.addEventListener('play', self.initialPlay, false);
+        self.addEventListener(self.domRef.player, 'play', self.initialPlay, false);
         self.setDefaultLayout();
     };
 
@@ -2015,10 +2016,10 @@ const fluidPlayerClass = function () {
     self.setCurrentTimeAndPlay = (newCurrentTime, shouldPlay) => {
         const loadedMetadata = () => {
             self.domRef.player.currentTime = newCurrentTime;
-            self.domRef.player.removeEventListener('loadedmetadata', loadedMetadata);
+            self.removeEventListener(self.domRef.player, 'loadedmetadata', loadedMetadata);
             // Safari ios and mac fix to set currentTime
             if (self.mobileInfo.userOs === 'iOS' || self.getBrowserVersion().browserName.toLowerCase() === 'safari') {
-                self.domRef.player.addEventListener('playing', videoPlayStart);
+                self.addEventListener(self.domRef.player, 'playing', videoPlayStart);
             }
 
             if (shouldPlay) {
@@ -2035,10 +2036,10 @@ const fluidPlayerClass = function () {
 
         let videoPlayStart = () => {
             self.currentTime = newCurrentTime;
-            self.domRef.player.removeEventListener('playing', videoPlayStart);
+            self.removeEventListener(self.domRef.player, 'playing', videoPlayStart);
         };
 
-        self.domRef.player.addEventListener('loadedmetadata', loadedMetadata, false);
+        self.addEventListener(self.domRef.player, 'loadedmetadata', loadedMetadata, false);
         self.domRef.player.load();
     };
 
@@ -2211,7 +2212,7 @@ const fluidPlayerClass = function () {
         self.mainVideoDuration = self.domRef.player.duration;
         self.mainVideoReadyState = true;
         self.domRef.player.dispatchEvent(event);
-        self.domRef.player.removeEventListener('loadedmetadata', self.mainVideoReady);
+        self.removeEventListener(self.domRef.player, 'loadedmetadata', self.mainVideoReady);
     };
 
     self.userActivityChecker = () => {
@@ -2363,10 +2364,10 @@ const fluidPlayerClass = function () {
     };
 
     self.linkControlBarUserActivity = () => {
-        self.domRef.player.addEventListener('userInactive', self.hideControlBar);
-        self.domRef.player.addEventListener('userActive', self.showControlBar);
-        self.domRef.player.addEventListener('userInactive', self.hideTitle);
-        self.domRef.player.addEventListener('userActive', self.showTitle);
+        self.addEventListener(self.domRef.player, 'userInactive', self.hideControlBar);
+        self.addEventListener(self.domRef.player, 'userActive', self.showControlBar);
+        self.addEventListener(self.domRef.player, 'userInactive', self.hideTitle);
+        self.addEventListener(self.domRef.player, 'userActive', self.showTitle);
     };
 
     self.initMute = () => {
@@ -2802,23 +2803,23 @@ const fluidPlayerClass = function () {
                 self.domRef.player.onended = functionCall;
                 break;
             case 'pause':
-                self.domRef.player.addEventListener('pause', () => {
+                self.addEventListener(self.domRef.player, 'pause', () => {
                     if (!self.fluidPseudoPause) {
                         functionCall();
                     }
                 });
                 break;
             case 'playing':
-                self.domRef.player.addEventListener('playing', functionCall);
+                self.addEventListener(self.domRef.player, 'playing', functionCall);
                 break;
             case 'theatreModeOn':
-                self.domRef.player.addEventListener('theatreModeOn', functionCall);
+                self.addEventListener(self.domRef.player, 'theatreModeOn', functionCall);
                 break;
             case 'theatreModeOff':
-                self.domRef.player.addEventListener('theatreModeOff', functionCall);
+                self.addEventListener(self.domRef.player, 'theatreModeOff', functionCall);
                 break;
             case 'timeupdate':
-                self.domRef.player.addEventListener('timeupdate', () => {
+                self.addEventListener(self.domRef.player, 'timeupdate', () => {
                     functionCall(self.getCurrentTime())
                 });
                 break;
@@ -2892,6 +2893,25 @@ const fluidPlayerClass = function () {
         }
     };
 
+    self.addEventListener = (el, type, handler, option) => {
+        if (!self.eventListeners[type]) {
+            self.eventListeners[type] = [];
+        }
+        self.eventListeners[type].push(handler);
+        el.addEventListener(type, handler, option);
+    };
+
+    self.removeEventListener = (el, type, handler) => {
+        if (self.eventListeners[type]) {
+            const handlers = self.eventListeners[type];
+            const index = handlers.indexOf(handler);
+            if (index >= 0) {
+                handlers.splice(index, 1);
+            }
+        }
+        el.removeEventListener(type, handler);
+    };
+
     self.destroy = () => {
         self.destroyed = true
 
@@ -2909,6 +2929,18 @@ const fluidPlayerClass = function () {
         if (!container) {
             console.warn('Unable to remove wrapper element for Fluid Player instance - element not found ' + self.videoPlayerId);
             return;
+        }
+
+        if (self.eventListeners) {
+            const events = Object.keys(self.eventListeners);
+            for (let i = events.length - 1; i >= 0; --i) {
+                const e = events[i];
+                const handlers = self.eventListeners[e];
+                for (let j = handlers.length - 1; j >= 0; --j) {
+                    video.removeEventListener(e, handlers[j]);
+                }
+            }
+            self.eventListeners = {};
         }
 
         container.removeChild(video)
